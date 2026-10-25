@@ -1,5 +1,8 @@
 from playwright.sync_api import sync_playwright, expect
 
+# Packs download lazily, once a visible material uses them.
+WAIT_TEXTURES = "async names => { const m = await import('./aquarium.js'); await Promise.race([m.whenTexturesLoaded(names), new Promise((_, fail) => setTimeout(() => fail(new Error('textures not loaded: ' + names)), 60000))]); }"
+
 with sync_playwright() as p:
     browser = p.chromium.launch()
     page = browser.new_page(viewport={"width": 1440, "height": 960}, locale="en-US", color_scheme="light")
@@ -21,6 +24,7 @@ with sync_playwright() as p:
     assert all(textured["plantSurfaces"]["standard"])
     assert textured["plantSurfaces"]["rotala"] and textured["plantSurfaces"]["lotus"]
     assert textured["plants"] == initial["plants"]
+    page.evaluate(WAIT_TEXTURES, ["leaf"])
     leaf = page.evaluate("async () => (await import('./aquarium.js')).materialSnapshot().leaf")
     assert leaf["loaded"] and leaf["width"] >= 1024 and leaf["hasHeight"] and leaf["hasRoughness"]
     page.locator("#plant-surface").select_option("smooth")

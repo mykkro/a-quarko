@@ -1,5 +1,9 @@
 from playwright.sync_api import sync_playwright, expect
 
+
+# Packs download lazily, once a visible material uses them.
+WAIT_TEXTURES = "async names => { const m = await import('./aquarium.js'); await Promise.race([m.whenTexturesLoaded(names), new Promise((_, fail) => setTimeout(() => fail(new Error('textures not loaded: ' + names)), 60000))]); }"
+
 with sync_playwright() as p:
     browser = p.chromium.launch()
     page = browser.new_page(viewport={"width": 1440, "height": 960}, locale="en-US", color_scheme="light")
@@ -24,10 +28,11 @@ with sync_playwright() as p:
     assert {x["type"] for x in initial["plankton"]} == {"algae", "diatom", "copepod"}
     assert {x["type"] for x in initial["shells"]} == {"clam", "scallop", "spiral"}
     assert all(initial["textures"].values()), (initial["textures"], page.evaluate("async () => (await import('./aquarium.js')).materialSnapshot()"))
+    page.evaluate(WAIT_TEXTURES, ["shrimp", "shell", "plankton"])
     materials = page.evaluate("async () => (await import('./aquarium.js')).materialSnapshot()")
-    assert len(materials) == 12 and all(m["loaded"] and m["url"].endswith(".jpg") for m in materials.values())
-    assert len(set(image_urls)) == 12 and all(url.endswith(".jpg") for url in image_urls)
-    print("All 12 JPEG textures and 9 new varieties loaded", flush=True)
+    assert all(materials[name]["loaded"] and materials[name]["url"].endswith(".jpg") for name in ["shrimp", "shell", "plankton"])
+    assert all(url.endswith(".jpg") for url in image_urls)
+    print("Microfauna JPEG textures and 9 new varieties loaded", flush=True)
     keys = ["cherryShrimp", "amanoShrimp", "blueShrimp", "greenPlankton", "diatoms", "copepods", "clamShell", "scallopShell", "spiralShell"]
     page.evaluate("""keys => keys.forEach(key => {const el=document.querySelector('#count-'+key);el.value=0;el.dispatchEvent(new Event('input',{bubbles:true}));})""", keys)
     expect(page.locator(".edition")).to_have_text("55 little lives. One tiny ecosystem.")
@@ -75,4 +80,4 @@ with sync_playwright() as p:
     assert not [url for url in failed_requests if url not in image_urls], failed_requests
     assert not errors, errors
     browser.close()
-    print("PASS: 3 shrimp, 3 plankton and 3 shell types, live counts, textures, motion/pause, persistence, Czech/mobile controls, and 12 JPEG-only source textures")
+    print("PASS: 3 shrimp, 3 plankton and 3 shell types, live counts, textures, motion/pause, persistence, Czech/mobile controls, and JPEG-only source textures")

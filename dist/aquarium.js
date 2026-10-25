@@ -7,7 +7,7 @@ import {createWaterAtmosphere,atmosphereDefaults} from './water.js';
 import {createPresentation} from './presentation.js';
 import {createRibbonPlants} from './ribbon-plants.js';
 import {createLighting,lightingDefaults,dayOptions,neonColors} from './lighting.js';
-import {loadMaterialTextures,applyTexturePack,setPlantSurface,leafSphereGeometry} from './materials.js';
+import {createTextureLibrary,applyTexturePack,setPlantSurface,leafSphereGeometry} from './materials.js';
 import {initPreferences,translate} from './preferences.js';
 import {sections,countItems,defaults,movementDefaults,createExtras} from './ecosystem.js';
 import {createTerrain,createLandmarks,terrainDefaults,terrainTypes} from './terrain.js';
@@ -42,7 +42,8 @@ function surfaceTexture(kind) {
 const stoneMap=surfaceTexture('stone'),mossMap=surfaceTexture('moss'),scaleMap=surfaceTexture('scales');
 const stoneMaterials=['#a7b5a7','#657d82'].map(color=>new THREE.MeshStandardMaterial({color,map:stoneMap,bumpMap:stoneMap,bumpScale:.12,roughness:.95}));
 const mossMaterial=new THREE.MeshStandardMaterial({color:'#a5c87e',map:mossMap,bumpMap:mossMap,bumpScale:.09,roughness:1});
-const generatedTextures=await loadMaterialTextures(renderer);
+// Textures stream in after the first frame; see createTextureLibrary.
+const textureLibrary=createTextureLibrary(renderer),generatedTextures=textureLibrary.packs;
 applyTexturePack(sand,generatedTextures.sand,{tint:'#e7e3d8',bump:.045});
 stoneMaterials.forEach((material,i)=>applyTexturePack(material,generatedTextures.stone,{tint:i?'#a4b5c0':'#e3e5da',bump:.065}));
 applyTexturePack(mossMaterial,generatedTextures.moss,{tint:'#d9e6ca',bump:.028});
@@ -162,6 +163,8 @@ function fishDestination(f,t){
  return new THREE.Vector3(x,Math.max(y,terrain.heightAt(x,z)+.65),z);
 }
 const clock=new THREE.Clock();
+// Download texture packs once something visible uses them, checked twice a second.
+let nextTextureCheck=0;
 function animate(){
  requestAnimationFrame(animate);const dt=Math.min(clock.getDelta(),.05);
  if(!paused){
@@ -175,7 +178,8 @@ function animate(){
   for(const b of bubbles){b.position.y+=dt*.32;b.position.x+=Math.sin(time+b.position.y)*dt*.025;if(b.position.y>8)b.position.y=.2;}
   for(let i=food.length-1;i>=0;i--){food[i].position.y-=dt*.30;if(food[i].position.y<3.8){scene.remove(food[i]);food[i].geometry.dispose();food[i].material.dispose();food.splice(i,1);}}
  }
- navigation.update();naturalFish.syncLighting();water.update(time);renderer.render(scene,camera);
+ navigation.update();naturalFish.syncLighting();water.update(time);if(clock.elapsedTime>=nextTextureCheck){nextTextureCheck=clock.elapsedTime+.5;textureLibrary.requestUsed(scene);}
+ renderer.render(scene,camera);
 }
 animate();
 // Population state also supports browser verification of live scene changes.
@@ -208,4 +212,6 @@ function setupEditor(){
  panel.querySelector('#reset-reef').onclick=()=>{clearTimeout(pending);settings={...defaults,...movementDefaults,...terrainDefaults,...lightingDefaults,...atmosphereDefaults,...castleDefaults};syncMovement();syncTerrain();syncLighting();syncAtmosphere();syncCastle();lighting.apply();for(const key in defaults){panel.querySelector(`#count-${key}`).value=settings[key];panel.querySelector(`#value-${key}`).value=settings[key];}rebuild();};
 }
 
-export function materialSnapshot(){return Object.fromEntries(Object.entries(generatedTextures).map(([name,pack])=>[name,pack?{loaded:true,url:pack.url,width:pack.width,height:pack.heightPixels,colorSpace:pack.color.colorSpace,dataColorSpace:pack.height.colorSpace,hasHeight:!!pack.height.image,hasRoughness:!!pack.roughness.image}: {loaded:false}]));}
+// Resolves when the named packs have loaded, without requesting them.
+export function whenTexturesLoaded(names){return Promise.all(names.map(name=>generatedTextures[name].ready));}
+export function materialSnapshot(){return Object.fromEntries(Object.entries(generatedTextures).map(([name,pack])=>[name,pack.loaded?{loaded:true,url:pack.url,width:pack.width,height:pack.heightPixels,colorSpace:pack.color.colorSpace,dataColorSpace:pack.height.colorSpace,hasHeight:!!pack.height.image,hasRoughness:!!pack.roughness.image}: {loaded:false}]));}

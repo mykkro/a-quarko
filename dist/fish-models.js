@@ -7,10 +7,9 @@ const colors=['#c7804d','#8aa9a2','#a7adb2','#a3babc','#d5d3b7','#497d9f','#b6b7
 export function createFishModels({scalePack,getSettings}){
   const anisotropy=scalePack?.color.anisotropy||1;
   function texture(canvas,color=true){const t=new THREE.CanvasTexture(canvas);t.colorSpace=color?THREE.SRGBColorSpace:THREE.NoColorSpace;t.anisotropy=anisotropy;return t;}
-  function skin(key,index){
-    const c=document.createElement('canvas');c.width=1024;c.height=512;const ctx=c.getContext('2d');
+  function paint(ctx,key,index){
     ctx.fillStyle=colors[index];ctx.fillRect(0,0,1024,512);
-    if(scalePack&&key!=='puffer'){
+    if(scalePack?.loaded&&key!=='puffer'){
       ctx.drawImage(scalePack.color.image,0,0,512,512);ctx.drawImage(scalePack.color.image,512,0,512,512);
       ctx.globalCompositeOperation='color';ctx.fillStyle=colors[index];ctx.fillRect(0,0,1024,512);ctx.globalCompositeOperation='source-over';
     }
@@ -24,6 +23,11 @@ export function createFishModels({scalePack,getSettings}){
     // Gill cover and lateral detail occupy the same place on both body sides.
     ctx.strokeStyle='#263e445c';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(800,145);ctx.bezierCurveTo(735,205,748,295,795,347);ctx.stroke();
     ctx.strokeStyle='#e4eee85c';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(810,145);ctx.bezierCurveTo(755,205,760,295,805,347);ctx.stroke();
+  }
+  function skin(key,index){
+    const c=document.createElement('canvas');c.width=1024;c.height=512;const ctx=c.getContext('2d');paint(ctx,key,index);
+    // Scale detail arrives later when the scan is still downloading.
+    if(scalePack&&!scalePack.loaded&&key!=='puffer')scalePack.ready.then(()=>{paint(ctx,key,index);material.map.needsUpdate=true;});
     const material=new THREE.MeshPhysicalMaterial({color:'#ffffff',map:texture(c),bumpMap:key==='puffer'?null:scalePack?.height,bumpScale:.007,roughnessMap:scalePack?.roughness,roughness:.50,metalness:.10,clearcoat:.35,clearcoatRoughness:.3});
     if(key==='neon'){
       const mask=document.createElement('canvas');mask.width=1024;mask.height=512;const m=mask.getContext('2d');m.fillStyle='#000';m.fillRect(0,0,1024,512);m.fillStyle='#fff';m.fillRect(90,220,775,24);material.emissiveMap=texture(mask);material.emissive.set('#40e9ff');
@@ -82,5 +86,5 @@ export function createFishModels({scalePack,getSettings}){
     if(stamp!==lastNeon){lastNeon=stamp;bodies[3].emissive.set({cyan:'#40e9ff',pink:'#ff63dc',lime:'#b7ff46'}[settings.neonColor]);bodies[3].emissiveIntensity=settings.neonGlow*(settings.timeOfDay==='night'?2.4:.8);}
   }
   syncLighting();
-  return {create,update,syncLighting,snapshot:()=>({scaleTexture:!!scalePack,species:bodies.map((m,i)=>({type:types[i],textured:!!m.map})),translucentFins:finMaterials.every(m=>m.transparent)})};
+  return {create,update,syncLighting,snapshot:()=>({scaleTexture:!!scalePack?.loaded,species:bodies.map((m,i)=>({type:types[i],textured:!!m.map})),translucentFins:finMaterials.every(m=>m.transparent)})};
 }

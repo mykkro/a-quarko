@@ -31,6 +31,10 @@ def render_details(page):
 
 
 
+
+# Packs download lazily, once a visible material uses them.
+WAIT_TEXTURES = "async names => { const m = await import('./aquarium.js'); await Promise.race([m.whenTexturesLoaded(names), new Promise((_, fail) => setTimeout(() => fail(new Error('textures not loaded: ' + names)), 60000))]); }"
+
 with sync_playwright() as p:
     browser = p.chromium.launch()
     page = browser.new_page(viewport={"width": 1440, "height": 960}, locale="en-US", color_scheme="light")
@@ -56,8 +60,10 @@ with sync_playwright() as p:
 
     initial = state()
     assert sum(c["type"] == "fern" for c in initial["ribbons"]["clumps"]) == 10
+    # Only the default finishes download until another one is shown.
+    page.evaluate(WAIT_TEXTURES, ["limestone", "slate"])
     mats = page.evaluate("async () => (await import('./aquarium.js')).materialSnapshot()")
-    assert all(mats[name]["loaded"] for name in ["limestone", "brick", "slate", "terracotta"])
+    assert not mats["brick"]["loaded"] and not mats["terracotta"]["loaded"]
     for wall in ["limestone", "brick", "stone", "mixed"]:
         page.locator("#castle-masonry").select_option(wall)
         assert state()["settings"]["castleMasonry"] == wall
@@ -67,6 +73,7 @@ with sync_playwright() as p:
     castles = [l for l in state()["landmarks"] if l["type"] == "castle"]
     assert [c["masonry"] for c in castles] == ["limestone", "brick"]
     assert all(set(c["roofMaterials"]) == {"castle-roof-slate", "castle-roof-terracotta"} for c in castles)
+    page.evaluate(WAIT_TEXTURES, ["brick", "terracotta"])
     for roof in ["slate", "terracotta"]:
         page.locator("#castle-roof").select_option(roof)
         assert all(set(l["roofMaterials"]) == {"castle-roof-"+roof} for l in state()["landmarks"] if l["type"] == "castle")
