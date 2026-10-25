@@ -1,6 +1,40 @@
 # Generated aquarium textures
 
+## Delivery formats
+
+The app loads the JPEG variants selected by `formats.json`. Original generated PNGs remain locally for editing. Run `python tools/convert_textures.py` from the repository root to update JPEGs and the manifest; Pillow is required. Images with actual alpha are kept as PNG and referenced that way in the manifest. No transparency is flattened. JPEG output uses quality 92, 4:4:4 chroma, progressive encoding and the original dimensions. Use `--force` when changing encoding quality. Alpha-based fins, glow and particle textures are generated in code and are not JPEG-encoded.
+
 Generated with the built-in `image_gen` tool. Original PNG outputs are preserved here as project assets. The runtime derives linear grayscale bump and roughness maps from the color images; these are visual approximations, not measured PBR scans. Color maps use sRGB. Sand uses planar world-scale UVs; all maps use repeating wrapping, mipmaps, and anisotropic filtering. Procedural materials remain as a fallback if image loading fails.
+
+## shell
+
+Assets: `shell-albedo-v1.png` (original) and `shell-albedo-v1.jpg` (app variant).
+
+Generated with the built-in image generation tool. Bump and roughness maps are derived locally.
+
+Final prompt:
+
+Use case: photorealistic-natural. Asset type: seamless albedo material for small 3D seashells in a browser aquarium. Square edge-to-edge macro surface scan of creamy ivory shell material with fine concentric growth lines, very subtle radial ridges, restrained warm peach and tan bands, tiny natural weathering speckles and pearl-like color variation. Continuous shell surface only, no shell silhouette, no complete shell, no background, no objects. Uniform diffuse neutral illumination without baked highlights or cast shadows, flat orthographic material scan. Low-to-medium contrast, delicate real shell texture, repeatable edges, no text, labels, border or watermark. 1024 square.
+
+## shrimp
+
+Assets: `shrimp-albedo-v1.png` (original) and `shrimp-albedo-v1.jpg` (app variant).
+
+Generated with the built-in image generation tool. Bump and roughness maps are derived locally.
+
+Final prompt:
+
+Use case: photorealistic-natural. Asset type: seamless albedo material for the segmented carapace of tiny freshwater aquarium shrimp. Square edge-to-edge macro surface scan of neutral pearly gray chitin with very fine natural granulation, delicate pale horizontal segmentation bands and minute muted gray-brown speckles. Continuous shell surface only, no shrimp silhouette, eyes, legs or antennae, no objects or backdrop. Mid-light neutral tones suitable for red, blue and translucent gray material tinting in a 3D renderer. Uniform diffuse neutral illumination, no baked highlights or directional shadows, flat orthographic scan, repeatable edges, no text or borders or watermark. 1024 square.
+
+## plankton
+
+Assets: `plankton-albedo-v1.png` (original) and `plankton-albedo-v1.jpg` (app variant).
+
+Generated with the built-in image generation tool. Bump and roughness maps are derived locally.
+
+Final prompt:
+
+Use case: photorealistic-natural. Asset type: albedo surface texture for tiny stylized diatoms and microscopic water organisms in a 3D aquarium. Square edge-to-edge microscopic scan of a continuous pale cream and muted gold-green biological cell surface, very fine translucent-looking cellular granules, delicate silica pore lattice and faint organic striations. No recognizable organism silhouettes, no whole cells, no objects or backdrop, no macro scene, only a subtle continuous material. Uniform diffuse illumination without baked shadows, flat orthographic texture, restrained low contrast, neutral pale colors that accept green and gold tints. Repeatable edges, no lettering, no borders, no watermark. 1024 square.
 
 ## limestone
 

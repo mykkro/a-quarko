@@ -46,7 +46,7 @@ with sync_playwright() as p:
     expect(page.locator("#time-of-day")).to_have_value("night")
     expect(page.locator("#neon-glow")).to_have_value("1.4")
     page.locator("#count-neon").fill("0")
-    expect(page.locator(".edition")).to_have_text("47 little lives. One tiny ecosystem.")
+    expect(page.locator(".edition")).to_have_text("94 little lives. One tiny ecosystem.")
     assert not any(f["type"] == "neon" for f in state()["fish"])
     page.locator("#reset-reef").click()
     expect(page.locator("#time-of-day")).to_have_value("day")

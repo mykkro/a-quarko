@@ -51,7 +51,7 @@ with sync_playwright() as p:
     page.locator("#close-editor").click()
     page.locator("#language").select_option("en")
     expect(page.locator("h1")).to_have_text("A little life.A little stillness.")
-    expect(page.locator(".edition")).to_have_text("55 little lives. One tiny ecosystem.")
+    expect(page.locator(".edition")).to_have_text("102 little lives. One tiny ecosystem.")
     page.locator("#customize").click()
     expect(page.locator("#editor-title")).to_have_text("Shape your reef")
     expect(page.locator('label[for="count-castle"]')).to_have_text("Miniature castles")

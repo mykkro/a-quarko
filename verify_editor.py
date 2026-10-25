@@ -8,7 +8,7 @@ with sync_playwright() as p:
     page.goto("http://localhost:5173", wait_until="domcontentloaded")
     page.locator("#customize").click()
     page.locator("#reset-reef").click()
-    assert page.locator('[id^="count-"]').count() == 26
+    assert page.locator('[id^="count-"]').count() == 35
 
     def snapshot():
         return page.evaluate("async () => (await import('./aquarium.js')).populationSnapshot()")
@@ -26,7 +26,7 @@ with sync_playwright() as p:
     page.evaluate("""() => document.querySelectorAll('[id^="count-"]').forEach(el => {
       el.value = 2; el.dispatchEvent(new Event('input', {bubbles:true}));
     })""")
-    expect(page.locator(".edition")).to_have_text("18 little lives. One tiny ecosystem.")
+    expect(page.locator(".edition")).to_have_text("30 little lives. One tiny ecosystem.")
     assert snapshot()["plants"] == 14
     page.locator("#school-motion").select_option("wander")
     page.locator("#activity").fill("2")
@@ -64,7 +64,7 @@ with sync_playwright() as p:
         assert all(a["position"] != b["position"] for a, b in zip(before["fish"], after["fish"]))
         assert all(a["position"] != b["position"] for a, b in zip(before["crawlers"], after["crawlers"]))
     page.locator("#reset-reef").click()
-    expect(page.locator(".edition")).to_have_text("55 little lives. One tiny ecosystem.")
+    expect(page.locator(".edition")).to_have_text("102 little lives. One tiny ecosystem.")
     page.locator("#close-editor").click()
     page.locator("#pause").click()
     before = snapshot()
@@ -81,5 +81,5 @@ with sync_playwright() as p:
     page.locator("#close-editor").click()
     page.locator("#light").click()
     assert not errors, errors
-    print("PASS: 26 variety controls, populations, persistence, three school movements, individual movement, pause, feeding, reset, and mobile panel; no runtime errors", flush=True)
+    print("PASS: 35 variety controls, populations, persistence, three school movements, individual movement, pause, feeding, reset, and mobile panel; no runtime errors", flush=True)
     browser.close()

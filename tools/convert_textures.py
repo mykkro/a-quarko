@@ -23,7 +23,13 @@ def convert_directory(directory, quality=92, force=False):
         raise ValueError(f"Texture directory does not exist: {directory}")
     if not 1 <= quality <= 100:
         raise ValueError("JPEG quality must be between 1 and 100")
-    formats, results = {}, []
+    manifest = directory / "formats.json"
+    existing = json.loads(manifest.read_text(encoding="utf-8")) if manifest.exists() else {}
+    if not isinstance(existing, dict):
+        raise ValueError("Texture manifest must contain a filename mapping")
+    # A checkout may contain delivery JPEGs but omit the large source PNGs.
+    formats = {key: value for key, value in existing.items() if isinstance(key, str) and isinstance(value, str) and Path(value).name == value and (directory / value).is_file()}
+    results = []
     for source in sorted(directory.glob("*-albedo-v1.png")):
         with Image.open(source) as original:
             if has_transparency(original):
@@ -49,7 +55,6 @@ def convert_directory(directory, quality=92, force=False):
                 status = "up to date"
             formats[source.stem] = target.name
             results.append({"source": source.name, "file": target.name, "status": status, "before": source.stat().st_size, "after": target.stat().st_size})
-    manifest = directory / "formats.json"
     content = json.dumps(formats, ensure_ascii=False, indent=2) + "\n"
     if not manifest.exists() or manifest.read_text(encoding="utf-8") != content:
         manifest.write_text(content, encoding="utf-8")

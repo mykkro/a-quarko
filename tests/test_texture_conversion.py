@@ -36,6 +36,9 @@ class TextureConversionTests(unittest.TestCase):
             before = (root / "leaf-albedo-v1.jpg").stat().st_mtime_ns
             converter.convert_directory(root)
             self.assertEqual((root / "leaf-albedo-v1.jpg").stat().st_mtime_ns, before)
+            (root / "leaf-albedo-v1.png").unlink()
+            converter.convert_directory(root)
+            self.assertEqual(json.loads((root / "formats.json").read_text())["leaf-albedo-v1"], "leaf-albedo-v1.jpg")
 
 
 if __name__ == "__main__":

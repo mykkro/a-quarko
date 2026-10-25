@@ -9,6 +9,7 @@ export function createMicrofauna({habitat,mesh,ground,rand,range,textures}){
   const shellMaterial=surface('#eee2cd',textures.shell,.014);shellMaterial.iridescence=.18;
   const interior=new THREE.MeshStandardMaterial({color:'#8d7560',roughness:.7});
   const planktonMaterials={algae:surface('#a8c887',textures.plankton,.002),diatom:surface('#ddc58d',textures.plankton,.002),copepod:surface('#e3c6a0',textures.plankton,.002)};
+  const antennaMaterial=new THREE.LineBasicMaterial({color:'#d4ceab',transparent:true,opacity:.65});
   const dark=new THREE.MeshStandardMaterial({color:'#1b3434',roughness:.3});
   function tube(points,r,material,parent){return mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points.map(p=>new THREE.Vector3(...p))),12,r,4,false),material,parent);}
   function group(x,y,z){const g=new THREE.Group();g.position.set(x,y,z);habitat.add(g);return g;}
@@ -65,7 +66,7 @@ export function createMicrofauna({habitat,mesh,ground,rand,range,textures}){
       const cell=mesh(new THREE.SphereGeometry(1,10,8),material,g);cell.scale.set(.024,.065,.025);
       for(let i=0;i<3;i++){const segment=mesh(new THREE.SphereGeometry(.016-i*.003,6,5),material,g);segment.position.y=-.065-i*.022;}
       const linePositions=[];for(const side of [-1,1]){linePositions.push(0,.035,0,side*.09,.10,0);for(let i=0;i<3;i++)linePositions.push(side*.02,-i*.026,0,side*.075,-i*.026-.025,0);}
-      const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(linePositions,3));g.add(new THREE.LineSegments(geo,new THREE.LineBasicMaterial({color:'#d4ceab',transparent:true,opacity:.65})));
+      const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(linePositions,3));g.add(new THREE.LineSegments(geo,antennaMaterial));
     }
     g.traverse(o=>{if(o.isMesh)o.castShadow=false;});plankton.push({type,g,origin:g.position.clone(),phase:rand()*6.28});
   }

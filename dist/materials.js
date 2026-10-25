@@ -1,9 +1,16 @@
 import * as THREE from './vendor/three.module.js';
 
 export async function loadMaterialTextures(renderer){
-  const loader=new THREE.TextureLoader(),anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());
+  const anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());
   const manifestUrl=new URL('./assets/textures/formats.json',import.meta.url);
   const files=await fetch(manifestUrl).then(r=>{if(!r.ok)throw new Error('Texture manifest missing');return r.json();});
+  async function loadImage(url){
+    const response=await fetch(url,{signal:AbortSignal.timeout(15000)});
+    if(!response.ok)throw new Error(`Texture request failed: ${response.status}`);
+    const objectUrl=URL.createObjectURL(await response.blob()),image=new Image();
+    try{image.src=objectUrl;await image.decode();const texture=new THREE.Texture(image);texture.needsUpdate=true;return texture;}
+    finally{URL.revokeObjectURL(objectUrl);}
+  }
   function configure(texture,color=false){
     texture.wrapS=texture.wrapT=THREE.RepeatWrapping;
     texture.anisotropy=anisotropy;texture.colorSpace=color?THREE.SRGBColorSpace:THREE.NoColorSpace;
@@ -13,7 +20,12 @@ export async function loadMaterialTextures(renderer){
     const file=files[`${name}-albedo-v1`]||`${name}-albedo-v1.jpg`;
     const url=new URL(`./assets/textures/${file}`,import.meta.url).href;
     try{
-      const color=configure(await loader.loadAsync(url),true);
+      let image;
+      for(let attempt=0;attempt<3;attempt++){
+        try{image=await loadImage(url);break;}
+        catch(error){if(attempt===2)throw error;await new Promise(resolve=>setTimeout(resolve,150));}
+      }
+      const color=configure(image,true);
       // Albedo-derived detail maps approximate surface relief; these are not
       // measured PBR scans. Keep data textures linear, unlike the color image.
       const size=512,canvas=document.createElement('canvas');canvas.width=canvas.height=size;
@@ -32,7 +44,9 @@ export async function loadMaterialTextures(renderer){
       return null;
     }
   }
-  const entries=await Promise.all(['sand','stone','moss','leaf','fish','limestone','brick','slate','terracotta','shell','shrimp','plankton'].map(async name=>[name,await pack(name)]));
+  const names=['sand','stone','moss','leaf','fish','limestone','brick','slate','terracotta','shell','shrimp','plankton'],entries=[];
+  // Bound concurrent image requests/decodes, including on simple local servers.
+  for(let i=0;i<names.length;i+=3)entries.push(...await Promise.all(names.slice(i,i+3).map(async name=>[name,await pack(name)])));
   return Object.fromEntries(entries);
 }
 

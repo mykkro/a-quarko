@@ -1,5 +1,7 @@
 # A-quarko
 
+Camera: drag with one finger or the left mouse button to rotate. Pinch with two fingers to zoom, and move both fingers together to pan. On desktop use Shift-drag, right-drag, or middle-drag to pan, and the wheel/trackpad to zoom. Zoom ranges from 0.65 to 70 scene units, including close inspection inside the planted tank. The home button resets the active view; each style remembers its camera position during the session. With the scene focused, use arrows to rotate, Shift-arrows to pan, +/− to zoom, and Home to reset.
+
 ![A-quarko screenshot](screenshots/a-quarko-hero.png)
 
 A small toy-like WebGL aquarium built with Three.js. Includes a sand island, textured rocks, gently swaying plants, four fish schools, individual fish, crabs, and snails.
@@ -19,6 +21,10 @@ Choose English or Čeština from the language menu. Czech covers the page, setti
 **Castle finishes** offers limestone blocks, aged red brick, weathered stone, or alternating masonry between castles. Roofs use generated slate shingles or terracotta tiles, with an option to alternate materials between towers. Walls have consistent world-scale texture mapping, while conical roofs have separate tile UVs, eaves and small finials. Finish selections persist and do not change castle counts. Existing ruins retain their rough stone finish.
 
 Water ferns now use five gently arching fronds per clump, slender stems, and thin tapered leaflets with irregular alternating spacing. Leaflets vary in length, pitch and color and narrow toward frond tips. They use open double-sided surfaces rather than inflated ellipsoid leaves, and share the existing plant-surface texture and animation controls.
+
+The sidebar also includes cherry, Amano and blue shrimp, green plankton clusters, golden diatoms, tiny copepods, and clam, scallop and spiral shells. Shrimp have textured segmented bodies, moving legs and antennae, and occasional little swimming hops. The plankton types drift differently and use a generated cellular surface. Shells have distinct modeled silhouettes with a shared generated growth-line texture. Snails and crabs also use the new shell/chitin detail. Small organisms are exaggerated for visibility rather than rendered at biological scale. Shells are decorations and are excluded from the living population count.
+
+Opaque source textures are served as JPEGs using `dist/assets/textures/formats.json`. Regenerate them with `python tools/convert_textures.py` (requires Pillow). The script retains PNG originals, skips genuine transparency, preserves dimensions, and creates high-quality progressive JPEGs. Use `--force --quality 92` to re-encode existing variants. Runtime alpha effects such as fin membranes, glow and particle sprites stay as canvas textures. The current 12 opaque texture images total 9.73 MB as JPEG rather than 45.78 MB as PNG (78.7% smaller).
 
 Three.js is vendored locally. The optional Google Fonts stylesheet requires internet; system fonts are used offline.
 

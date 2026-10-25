@@ -1,4 +1,10 @@
 const cs={
+  '1 finger: rotate · 2 fingers: pan & zoom':'1 prst: otáčení · 2 prsty: posun a přiblížení',
+  'Drag to rotate':'Tažením otáčejte','Shift/right-drag to pan':'Shift nebo pravé tlačítko pro posun','Scroll or pinch to zoom':'Kolečkem nebo sevřením prstů přibližujte','Reset view':'Obnovit pohled',
+  'Tiny shrimp':'Drobné krevetky','Cherry shrimp':'Červené krevetky','Amano shrimp':'Krevetky Amano','Blue shrimp':'Modré krevetky',
+  'Water plankton':'Vodní plankton','Green cell clusters':'Zelené shluky buněk','Golden diatoms':'Zlatavé rozsivky','Tiny copepods':'Drobní klanonožci',
+  'Seashells':'Lastury a ulity','Clam shells':'Lastury škeblí','Scallop shells':'Lastury hřebenatek','Spiral shells':'Spirálové ulity',
+  'Bottom dwellers':'Obyvatelé dna','Plankton':'Plankton',
   'Castle finishes':'Povrchy hradů','Castle walls':'Hradní zdi','Tower roofs':'Střechy věží',
   'Limestone blocks':'Vápencové kvádry','Aged red brick':'Staré červené cihly','Weathered stone':'Zvětralý kámen','Mixed masonry':'Střídavé zdivo',
   'Slate shingles':'Břidlicové šindele','Terracotta tiles':'Pálené tašky','Mixed tower roofs':'Střídavé střechy věží',

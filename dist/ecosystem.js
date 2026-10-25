@@ -8,18 +8,22 @@ export const sections = [
   ['Moss', [['cushion','Cushion clumps',120,65],['carpet','Carpet patches',40,12],['marimo','Marimo balls',20,4],['java','Java moss tufts',24,5]]],
   ['Fish schools', [['sun','Sunburst fish',40,12],['lagoon','Lagoon fish',40,16],['moon','Moonbeam fish',40,10],['neon','Neon tetras',40,8]]],
   ['Individual fish', [['angel','Angelfish · graceful gliders',8,1],['betta','Betta · wandering fins',8,1],['puffer','Puffers · hover & dart',8,2]]],
-  ['Little bottom dwellers', [['crab','Sand crabs',12,2],['snail','Spiral snails',12,3]]]
+  ['Little bottom dwellers', [['crab','Sand crabs',12,2],['snail','Spiral snails',12,3]]],
+  ['Tiny shrimp', [['cherryShrimp','Cherry shrimp',12,4],['amanoShrimp','Amano shrimp',12,3],['blueShrimp','Blue shrimp',12,2]]],
+  ['Water plankton', [['greenPlankton','Green cell clusters',60,18],['diatoms','Golden diatoms',60,12],['copepods','Tiny copepods',40,8]]],
+  ['Seashells', [['clamShell','Clam shells',16,2],['scallopShell','Scallop shells',16,2],['spiralShell','Spiral shells',16,2]]]
 ];
 export const countItems=sections.flatMap(([,items])=>items);
 export const defaults=Object.fromEntries(countItems.map(([key,,,count])=>[key,count]));
 export const movementDefaults={schoolMotion:'cruise',activity:1};
 
-export function createExtras({habitat,mesh,mat,green,mossMaterial,stoneMap,rand,range,ground,stonePack,leafPack}) {
+export function createExtras({habitat,mesh,mat,green,mossMaterial,stoneMap,rand,range,ground,stonePack,leafPack,texturePacks={}}) {
   const ruby=mat('#bd6c78'),lotus=mat('#80ad78');
   const lavaMaterial=new THREE.MeshStandardMaterial({color:'#674f46',map:stoneMap,bumpMap:stoneMap,bumpScale:.28,roughness:1});
   applyTexturePack(lavaMaterial,stonePack,{tint:'#8e7164',bump:.085});
   const crystalMaterial=new THREE.MeshPhysicalMaterial({color:'#cee9dd',roughness:.28,metalness:.05,clearcoat:.8});
   const crabMat=mat('#d38562'),shellMat=mat('#bb915f'),shellBand=mat('#725a43'),snailMat=mat('#a3ad7e'),eyes=mat('#183e38');
+  applyTexturePack(shellMat,texturePacks.shell,{tint:'#e6cfb4',bump:.009});applyTexturePack(crabMat,texturePacks.shrimp,{tint:'#d38562',bump:.006});
   const crawlers=[];
   function tube(points,r,material,parent){return mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points),16,r,5,false),material,parent);}
   function groupAt(x,y,z){const g=new THREE.Group();g.position.set(x,ground(x,z)+y,z);habitat.add(g);return g;}

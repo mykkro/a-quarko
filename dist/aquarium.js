@@ -1,4 +1,6 @@
 import * as THREE from './vendor/three.module.js';
+import {createCameraControls} from './camera-controls.js';
+import {createMicrofauna} from './microfauna.js';
 import {castleDefaults,masonryOptions,roofOptions} from './castle-materials.js';
 import {createFishModels} from './fish-models.js';
 import {createWaterAtmosphere,atmosphereDefaults} from './water.js';
@@ -14,7 +16,7 @@ const host=document.querySelector('#aquarium');
 const scene=new THREE.Scene();scene.background=new THREE.Color('#c8e5df');scene.fog=new THREE.Fog('#c8e5df',23,56);
 let renderer;try{renderer=new THREE.WebGLRenderer({antialias:true,alpha:false});}catch(e){host.innerHTML='<p style="padding:40px">'+translate('This aquarium needs WebGL. Please enable hardware acceleration in your browser.')+'</p>';throw e;}
 renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;host.appendChild(renderer.domElement);
-const camera=new THREE.PerspectiveCamera(38,1,.1,100);const target=new THREE.Vector3(0,1.5,0);let az=.38,el=.40,distance=28;
+const camera=new THREE.PerspectiveCamera(38,1,.02,120);
 const ambient=new THREE.HemisphereLight(0xe6fff4,0x6d9286,2.6);scene.add(ambient);const sun=new THREE.DirectionalLight(0xfff1cf,3.1);sun.position.set(-7,15,8);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);Object.assign(sun.shadow.camera,{left:-14,right:14,top:14,bottom:-14});sun.shadow.bias=-.001;scene.add(sun);
 const mat=(color,roughness=.8)=>new THREE.MeshStandardMaterial({color,roughness});const sand=mat('#e5d7ae');const green=[mat('#478766'),mat('#76a76b'),mat('#326e58'),mat('#99b96b')];
 function mesh(geo,material,parent=scene){const m=new THREE.Mesh(geo,material);m.castShadow=true;m.receiveShadow=true;parent.add(m);return m;}
@@ -48,8 +50,8 @@ const palettes=[['#f6a15f','#ffc786'],['#56bfb9','#a6eadb'],['#b6a0de','#ded0f5'
 const fishMaterials=palettes.map(c=>[new THREE.MeshStandardMaterial({color:c[0],map:scaleMap,bumpMap:scaleMap,bumpScale:.012,roughness:.4}),mat(c[1],.5)]),eyeMat=mat('#173c3a');
 let settings={...defaults,...movementDefaults,...terrainDefaults,...lightingDefaults,...atmosphereDefaults,...castleDefaults};
 try{const saved=JSON.parse(localStorage.getItem('a-quarko-settings'));for(const [key,,max] of countItems)if(Number.isInteger(saved?.[key]))settings[key]=Math.max(0,Math.min(max,saved[key]));if(masonryOptions.some(([key])=>key===saved?.castleMasonry))settings.castleMasonry=saved.castleMasonry;if(roofOptions.some(([key])=>key===saved?.castleRoof))settings.castleRoof=saved.castleRoof;if(['auto','playful','realistic'].includes(saved?.fishAppearance))settings.fishAppearance=saved.fishAppearance;if(['auto','smooth','textured'].includes(saved?.plantSurface))settings.plantSurface=saved.plantSurface;if(['miniature','planted'].includes(saved?.visualStyle))settings.visualStyle=saved.visualStyle;for(const key of ['waterAtmosphere','specks'])if(Number.isFinite(saved?.[key]))settings[key]=THREE.MathUtils.clamp(saved[key],0,1);if(dayOptions.some(([key])=>key===saved?.timeOfDay))settings.timeOfDay=saved.timeOfDay;if(neonColors.some(([key])=>key===saved?.neonColor))settings.neonColor=saved.neonColor;if(Number.isFinite(saved?.neonGlow))settings.neonGlow=THREE.MathUtils.clamp(saved.neonGlow,0,2);if(terrainTypes.some(([key])=>key===saved?.terrainType))settings.terrainType=saved.terrainType;if(Number.isFinite(saved?.relief))settings.relief=THREE.MathUtils.clamp(saved.relief,0,1.8);if(['cruise','wander','dart'].includes(saved?.schoolMotion))settings.schoolMotion=saved.schoolMotion;if(Number.isFinite(saved?.activity))settings.activity=THREE.MathUtils.clamp(saved.activity,.25,2);}catch{}
-const cameraViews={miniature:{az:.38,el:.40,distance:28},planted:{az:.18,el:.13,distance:30}};let viewedStyle='miniature';
-function syncPresentationCamera(){if(viewedStyle!==settings.visualStyle){cameraViews[viewedStyle]={az,el,distance};viewedStyle=settings.visualStyle;({az,el,distance}=cameraViews[viewedStyle]);}target.y=viewedStyle==='planted'?3.3:1.5;}
+const navigation=createCameraControls({host,camera,getStyle:()=>settings.visualStyle});
+function syncPresentationCamera(){navigation.setStyle(settings.visualStyle);}
 syncPresentationCamera();
 const naturalFish=createFishModels({scalePack:generatedTextures.fish,getSettings:()=>settings});
 const lighting=createLighting({scene,sun,ambient,renderer,fishMaterials,getSettings:()=>settings});
@@ -58,7 +60,8 @@ const terrain=createTerrain({mesh,sand,getSettings:()=>settings});
 const water=createWaterAtmosphere({scene,getSettings:()=>settings});
 const presentation=createPresentation({scene,mesh,mat,stonePack:generatedTextures.stone,fishMaterials,green,base,terrain,getSettings:()=>settings});
 const ribbons=createRibbonPlants({habitat,mesh,ground:terrain.heightAt,range,rand,leafPack:generatedTextures.leaf});
-const extras=createExtras({habitat,mesh,mat,green,mossMaterial,stoneMap,rand,range,ground:terrain.heightAt,stonePack:generatedTextures.stone,leafPack:generatedTextures.leaf});
+const microfauna=createMicrofauna({habitat,mesh,ground:terrain.heightAt,rand,range,textures:generatedTextures});
+const extras=createExtras({habitat,mesh,mat,green,mossMaterial,stoneMap,rand,range,ground:terrain.heightAt,stonePack:generatedTextures.stone,leafPack:generatedTextures.leaf,texturePacks:generatedTextures});
 const landmarks=createLandmarks({habitat,mesh,mat,stoneMap,mossMaterial,ground:terrain.heightAt,stonePack:generatedTextures.stone,texturePacks:generatedTextures});
 function applyPlantSurfaces(){const textured=settings.plantSurface==='textured'||(settings.plantSurface==='auto'&&settings.visualStyle==='planted');for(const material of green)setPlantSurface(material,generatedTextures.leaf,textured);ribbons.setSurface(textured);extras.setSurface(textured);}
 function plant(x,z,height,type){
@@ -84,7 +87,7 @@ function plant(x,z,height,type){
 }
 function rebuild(){
  // Materials and their textures are shared; only replaced geometry is disposed.
- habitat.traverse(o=>{if(o.isMesh)o.geometry.dispose();if(o.isInstancedMesh)o.dispose();});habitat.clear();plants.length=0;fish.length=0;extras.crawlers.length=0;seed=42;
+ habitat.traverse(o=>{if(o.isMesh||o.isLine)o.geometry.dispose();if(o.isInstancedMesh)o.dispose();});habitat.clear();plants.length=0;fish.length=0;extras.crawlers.length=0;seed=42;
  terrain.update();for(const p of pebbles)p.position.y=terrain.heightAt(p.position.x,p.position.z)+.025;
  const anchors=[];
  for(const [type,key] of [[0,'river'],[1,'slate']])for(let i=0;i<settings[key];i++){
@@ -127,9 +130,10 @@ function rebuild(){
  }});
  landmarks.build(settings);
  for(const type of ['crab','snail'])for(let i=0;i<settings[type];i++)extras.crawler(type,i);
+ microfauna.build(settings);
  presentation.apply();applyPlantSurfaces();syncPresentationCamera();
- document.querySelector('.edition').textContent=`${fish.length+extras.crawlers.length} little lives. One tiny ecosystem.`;
- const legend=document.querySelector('.legend');legend.innerHTML='<span class="eyebrow">MEET THE NEIGHBORS</span>'+[['#ffac65','Sunburst school',settings.sun],['#66dcd2','Lagoon school',settings.lagoon],['#c3b1ff','Moonbeam school',settings.moon],['#55cfdf','Neon tetras',settings.neon],['#e4cc94','Individual fish',settings.angel+settings.betta+settings.puffer],['#c38b6d','Crabs & snails',settings.crab+settings.snail]].map(([color,label,count])=>`<div><i style="--c:${color}"></i>${label}<b>${count}</b></div>`).join('');
+ document.querySelector('.edition').textContent=`${fish.length+extras.crawlers.length+microfauna.shrimp.length+microfauna.plankton.length} little lives. One tiny ecosystem.`;
+ const legend=document.querySelector('.legend');legend.innerHTML='<span class="eyebrow">MEET THE NEIGHBORS</span>'+[['#ffac65','Sunburst school',settings.sun],['#66dcd2','Lagoon school',settings.lagoon],['#c3b1ff','Moonbeam school',settings.moon],['#55cfdf','Neon tetras',settings.neon],['#e4cc94','Individual fish',settings.angel+settings.betta+settings.puffer],['#c38b6d','Bottom dwellers',settings.crab+settings.snail+microfauna.shrimp.length],['#bacb8c','Plankton',microfauna.plankton.length]].map(([color,label,count])=>`<div><i style="--c:${color}"></i>${label}<b>${count}</b></div>`).join('');
  try{localStorage.setItem('a-quarko-settings',JSON.stringify(settings));}catch{}
 }
 const bubbles=[];const bubbleMat=new THREE.MeshPhysicalMaterial({color:'#e0fff7',transparent:true,opacity:.25,roughness:.08,metalness:.1});for(let i=0;i<45;i++){const b=mesh(new THREE.SphereGeometry(range(.025,.07),8,6),bubbleMat);b.position.set(range(-7,7),range(.3,8),range(-4,4));b.castShadow=false;bubbles.push(b);}
@@ -140,7 +144,7 @@ document.querySelector('#feed').onclick=()=>{feeding=10;for(let i=0;i<24;i++){co
 document.querySelector('#pause').onclick=e=>{paused=!paused;e.currentTarget.textContent=paused?'▶':'Ⅱ';e.currentTarget.setAttribute('aria-label',paused?'Resume animation':'Pause animation');};
 document.querySelector('#declutter').onclick=e=>{const hidden=document.body.classList.toggle('declutter');const editor=document.querySelector('#reef-editor');if(hidden&&editor?.open)editor.close();e.currentTarget.textContent=hidden?'←':'⛶';e.currentTarget.setAttribute('aria-label',hidden?'Show overlay':'Hide overlay');e.currentTarget.title=hidden?'Show overlay':'Hide overlay';};
 initPreferences(dark=>{lighting.setInterfaceDark(dark);presentation.apply();});
-let drag=null;host.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY};host.setPointerCapture(e.pointerId);});host.addEventListener('pointermove',e=>{if(!drag)return;az-=(e.clientX-drag.x)*.006;if(settings.visualStyle==='planted')az=THREE.MathUtils.clamp(az,-.65,.65);el=THREE.MathUtils.clamp(el+(e.clientY-drag.y)*.004,settings.visualStyle==='planted'?.04:.12,settings.visualStyle==='planted'?.55:1.15);drag={x:e.clientX,y:e.clientY};});host.addEventListener('pointerup',()=>drag=null);host.addEventListener('pointercancel',()=>drag=null);host.addEventListener('wheel',e=>{e.preventDefault();distance=THREE.MathUtils.clamp(distance+e.deltaY*.015,settings.visualStyle==='planted'?20:15,44);},{passive:false});
+document.querySelector('#reset-view').onclick=()=>navigation.reset();
 function resize(){camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);}addEventListener('resize',resize);resize();
 function fishDestination(f,t){
  const solo=f.school>=4;
@@ -166,16 +170,16 @@ function animate(){
    if(direction.lengthSq()>.00001){const angle=Math.atan2(-direction.z,direction.x),delta=Math.atan2(Math.sin(angle-f.g.rotation.y),Math.cos(angle-f.g.rotation.y));f.g.rotation.y+=delta*Math.min(1,dt*4);f.g.rotation.z=THREE.MathUtils.clamp(direction.y*.15,-.2,.2);}
    if(f.realistic)naturalFish.update(f.model,time,f.phase);else{f.tail.rotation.y=Math.sin(time*(f.key==='angel'?5:10)+f.phase)*.55;if(f.flowingFin)f.flowingFin.rotation.y=Math.sin(time*3+f.phase)*.3;}f.g.rotation.z+=Math.sin(time*4+f.phase)*.018;
   }
-  extras.update(time);ribbons.update(time);
+  extras.update(time);ribbons.update(time);microfauna.update(time);
   for(const p of plants){p.group.rotation.z=Math.sin(time*.8+p.phase)*.035;p.group.rotation.x=Math.cos(time*.6+p.phase)*.025;}
   for(const b of bubbles){b.position.y+=dt*.32;b.position.x+=Math.sin(time+b.position.y)*dt*.025;if(b.position.y>8)b.position.y=.2;}
   for(let i=food.length-1;i>=0;i--){food[i].position.y-=dt*.30;if(food[i].position.y<3.8){scene.remove(food[i]);food[i].geometry.dispose();food[i].material.dispose();food.splice(i,1);}}
  }
- camera.position.set(Math.sin(az)*Math.cos(el)*distance,Math.sin(el)*distance,Math.cos(az)*Math.cos(el)*distance);camera.lookAt(target);naturalFish.syncLighting();water.update(time);renderer.render(scene,camera);
+ navigation.update();naturalFish.syncLighting();water.update(time);renderer.render(scene,camera);
 }
 animate();
 // Population state also supports browser verification of live scene changes.
-export function populationSnapshot(){return {fish:fish.map(f=>({type:f.key,realistic:f.realistic,position:f.g.position.toArray()})),crawlers:extras.crawlers.map(c=>({type:c.type,position:c.g.position.toArray()})),fishModels:naturalFish.snapshot(),plants:plants.length,plantSurfaces:{standard:green.map(m=>!!m.map),...extras.surfaceSnapshot()},ribbons:{...ribbons.snapshot(),clumps:plants.filter(p=>p.type==='kelp'||p.type==='grass'||p.type==='fern').map(p=>({type:p.type,root:p.group.position.toArray(),vertices:p.group.getObjectByName('flat-ribbon-leaves').geometry.attributes.position.count}))},meshes:habitat.children.length,water:water.snapshot(),presentation:presentation.snapshot(),lighting:lighting.snapshot(),terrain:terrain.snapshot(),landmarks:landmarks.landmarks.map(l=>({type:l.type,masonry:l.masonry,roof:l.roof,roofMaterials:l.g.children.filter(c=>c.name==='textured-castle-roof').map(c=>c.material.name),position:l.g.position.toArray()})),paused,settings:{...settings}};}
+export function populationSnapshot(){return {camera:navigation.snapshot(),fish:fish.map(f=>({type:f.key,realistic:f.realistic,position:f.g.position.toArray()})),crawlers:extras.crawlers.map(c=>({type:c.type,position:c.g.position.toArray()})),microfauna:microfauna.snapshot(),fishModels:naturalFish.snapshot(),plants:plants.length,plantSurfaces:{standard:green.map(m=>!!m.map),...extras.surfaceSnapshot()},ribbons:{...ribbons.snapshot(),clumps:plants.filter(p=>p.type==='kelp'||p.type==='grass'||p.type==='fern').map(p=>({type:p.type,root:p.group.position.toArray(),vertices:p.group.getObjectByName('flat-ribbon-leaves').geometry.attributes.position.count}))},meshes:habitat.children.length,water:water.snapshot(),presentation:presentation.snapshot(),lighting:lighting.snapshot(),terrain:terrain.snapshot(),landmarks:landmarks.landmarks.map(l=>({type:l.type,masonry:l.masonry,roof:l.roof,roofMaterials:l.g.children.filter(c=>c.name==='textured-castle-roof').map(c=>c.material.name),position:l.g.position.toArray()})),paused,settings:{...settings}};}
 
 function setupEditor(){
  const opener=document.createElement('button');opener.id='customize';opener.textContent='\u2637  Shape your reef';opener.setAttribute('aria-haspopup','dialog');document.body.append(opener);
@@ -204,4 +208,4 @@ function setupEditor(){
  panel.querySelector('#reset-reef').onclick=()=>{clearTimeout(pending);settings={...defaults,...movementDefaults,...terrainDefaults,...lightingDefaults,...atmosphereDefaults,...castleDefaults};syncMovement();syncTerrain();syncLighting();syncAtmosphere();syncCastle();lighting.apply();for(const key in defaults){panel.querySelector(`#count-${key}`).value=settings[key];panel.querySelector(`#value-${key}`).value=settings[key];}rebuild();};
 }
 
-export function materialSnapshot(){return Object.fromEntries(Object.entries(generatedTextures).map(([name,pack])=>[name,pack?{loaded:true,width:pack.width,height:pack.heightPixels,colorSpace:pack.color.colorSpace,dataColorSpace:pack.height.colorSpace,hasHeight:!!pack.height.image,hasRoughness:!!pack.roughness.image}: {loaded:false}]));}
+export function materialSnapshot(){return Object.fromEntries(Object.entries(generatedTextures).map(([name,pack])=>[name,pack?{loaded:true,url:pack.url,width:pack.width,height:pack.heightPixels,colorSpace:pack.color.colorSpace,dataColorSpace:pack.height.colorSpace,hasHeight:!!pack.height.image,hasRoughness:!!pack.roughness.image}: {loaded:false}]));}
