@@ -1,4 +1,7 @@
 const cs={
+  'Air bubbles':'Vzduchové bubliny','Bubble bursts':'Dávky bublinek','Mixed bursts':'Smíšené dávky','Fine fizz':'Jemné perlení','Larger sparse bubbles':'Větší řídké bubliny','Off':'Vypnuto',
+  'Time between bursts':'Interval mezi dávkami','Burst strength':'Síla dávky','Release a burst':'Vypustit bublinky',
+  'Small fizz or a few larger air bubbles rise from the sand in occasional bursts.':'Z písku občas vystoupá jemné perlení nebo několik větších vzduchových bublin.',
   '1 finger: rotate · 2 fingers: pan & zoom':'1 prst: otáčení · 2 prsty: posun a přiblížení',
   'Drag to rotate':'Tažením otáčejte','Shift/right-drag to pan':'Shift nebo pravé tlačítko pro posun','Scroll or pinch to zoom':'Kolečkem nebo sevřením prstů přibližujte','Reset view':'Obnovit pohled',
   'Tiny shrimp':'Drobné krevetky','Cherry shrimp':'Červené krevetky','Amano shrimp':'Krevetky Amano','Blue shrimp':'Modré krevetky',

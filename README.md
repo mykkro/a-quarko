@@ -1,5 +1,7 @@
 # A-quarko
 
+**Air bubbles** in the sidebar controls occasional fine-fizz bursts, sparse larger bubbles, a mixture of both, or Off. Set the interval (5–35 seconds) and burst strength, or use **Release a burst** to preview one immediately. Bubbles start at the terrain, drift and expand slightly as they rise, and fade at the water surface. The effect replaces the old steady trickle with one fixed-capacity particle pool and one draw call; it pauses with the scene and follows the activity setting. Bubble preferences are saved independently of organism counts.
+
 Camera: drag with one finger or the left mouse button to rotate. Pinch with two fingers to zoom, and move both fingers together to pan. On desktop use Shift-drag, right-drag, or middle-drag to pan, and the wheel/trackpad to zoom. Zoom ranges from 0.65 to 70 scene units, including close inspection inside the planted tank. The home button resets the active view; each style remembers its camera position during the session. With the scene focused, use arrows to rotate, Shift-arrows to pan, +/− to zoom, and Home to reset.
 
 ![A-quarko screenshot](screenshots/a-quarko-hero.png)
