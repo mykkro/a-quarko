@@ -2,10 +2,11 @@ import * as THREE from './vendor/three.module.js';
 import {createCastleMaterials,masonryBoxUV,masonryRoundUV} from './castle-materials.js';
 import {applyTexturePack} from './materials.js';
 
-export const terrainDefaults={terrainType:'dunes',relief:.65};
+export const terrainDefaults={terrainType:'dunes',relief:.65,groundMaterial:'sand'};
+export const groundOptions=[['sand','Warm river sand'],['darksoil','Dark aquasoil'],['rivergravel','Mixed river gravel'],['quartzsand','Pale quartz sand']];
 export const terrainTypes=[['flat','Quiet sand bed'],['dunes','Rippled dunes'],['hills','Rolling hills'],['basin','Rocky basin'],['terraces','Sunken terraces']];
 
-export function createTerrain({mesh,sand,getSettings}){
+export function createTerrain({mesh,sand,getSettings,texturePacks={}}){
   const segments=128,rings=48,vertices=[],indices=[];
   // Concentric rings preserve the rounded shoreline while adding enough
   // interior vertices for actual relief rather than a flat triangle fan.
@@ -27,6 +28,16 @@ export function createTerrain({mesh,sand,getSettings}){
   const rectUvs=rectangularGeo.attributes.uv;for(let i=0;i<rectUvs.count;i++)rectUvs.setXY(i,rectangularGeo.attributes.position.getX(i)/4.4+.5,rectangularGeo.attributes.position.getZ(i)/4.4+.5);
   const plantedSand=sand.clone();plantedSand.color.set('#8e8d71');
   const rectangular=mesh(rectangularGeo,plantedSand);rectangular.castShadow=false;rectangular.visible=false;
+  const groundProperties={sand:{tile:4.4,bump:.045,tint:'#e7e3d8'},darksoil:{tile:2.4,bump:.065,tint:'#dfd8cd'},rivergravel:{tile:2.8,bump:.07,tint:'#dddcd3'},quartzsand:{tile:4.4,bump:.025,tint:'#dddcd2'}};
+  let currentGround='';
+  function applyGroundMaterial(){
+    const settings=getSettings(),key=groundProperties[settings.groundMaterial]?settings.groundMaterial:'sand',planted=settings.visualStyle==='planted',stamp=key+planted;
+    if(currentGround===stamp)return;currentGround=stamp;
+    const properties=groundProperties[key],pack=texturePacks[key];
+    for(const material of [sand,sideMaterial,plantedSand]){applyTexturePack(material,pack,{tint:properties.tint,bump:properties.bump});material.color.set(material===plantedSand&&key==='sand'?'#8e8d71':properties.tint);}
+    for(const geo of [geometry,rectangularGeo]){const p=geo.attributes.position,uv=geo.attributes.uv;for(let i=0;i<p.count;i++)uv.setXY(i,p.getX(i)/properties.tile+.5,p.getZ(i)/properties.tile+.5);uv.needsUpdate=true;}
+    for(let i=0;i<sideUvs.count;i++)sideUvs.setXY(i,(i%129)/128*44/properties.tile,i<129?.22/properties.tile:0);sideUvs.needsUpdate=true;
+  }
   function heightAt(x,z){
     const {terrainType,relief}=getSettings(),r=Math.sqrt((x/8.8)**2+(z/6.16)**2),fade=1-THREE.MathUtils.smoothstep(r,.69,1);
     let h=0;
@@ -43,8 +54,8 @@ export function createTerrain({mesh,sand,getSettings}){
     positions.needsUpdate=true;colors.needsUpdate=true;geo.computeVertexNormals();geo.computeBoundingSphere();
     }
   }
-  function snapshot(){return {type:getSettings().terrainType,relief:getSettings().relief,vertices:geometry.attributes.position.count,samples:[[-3,-1],[0,0],[3,1],[5,2],[8.8,0]].map(([x,z])=>({x,z,y:heightAt(x,z)}))};}
-  function setPresentation(planted){surface.visible=!planted;skirt.visible=!planted;rectangular.visible=planted;}
+  function snapshot(){return {material:getSettings().groundMaterial||'sand',type:getSettings().terrainType,relief:getSettings().relief,vertices:geometry.attributes.position.count,samples:[[-3,-1],[0,0],[3,1],[5,2],[8.8,0]].map(([x,z])=>({x,z,y:heightAt(x,z)}))};}
+  function setPresentation(planted){surface.visible=!planted;skirt.visible=!planted;rectangular.visible=planted;applyGroundMaterial();}
   update();return {heightAt,update,snapshot,setPresentation};
 }
 

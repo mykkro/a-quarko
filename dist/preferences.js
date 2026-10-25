@@ -1,4 +1,5 @@
 const cs={
+  'Ground material':'Materiál dna','Warm river sand':'Teplý říční písek','Dark aquasoil':'Tmavý akvarijní substrát','Mixed river gravel':'Pestrý říční štěrk','Pale quartz sand':'Světlý křemičitý písek',
   'Air bubbles':'Vzduchové bubliny','Bubble bursts':'Dávky bublinek','Mixed bursts':'Smíšené dávky','Fine fizz':'Jemné perlení','Larger sparse bubbles':'Větší řídké bubliny','Off':'Vypnuto',
   'Time between bursts':'Interval mezi dávkami','Burst strength':'Síla dávky','Release a burst':'Vypustit bublinky',
   'Small fizz or a few larger air bubbles rise from the sand in occasional bursts.':'Z písku občas vystoupá jemné perlení nebo několik větších vzduchových bublin.',

@@ -16,7 +16,7 @@ with sync_playwright() as p:
     default_packs = ["sand", "stone", "moss", "fish", "limestone", "slate", "shell", "shrimp", "plankton"]
     page.evaluate(WAIT_TEXTURES, default_packs)
     materials = page.evaluate("async () => (await import('./aquarium.js')).materialSnapshot()")
-    assert set(materials) == {"sand", "stone", "moss", "leaf", "fish", "limestone", "brick", "slate", "terracotta", "shell", "shrimp", "plankton"}
+    assert set(materials) == {"sand", "stone", "moss", "leaf", "fish", "limestone", "brick", "slate", "terracotta", "shell", "shrimp", "plankton", "darksoil", "rivergravel", "quartzsand"}
     for name, material in materials.items():
         if name not in default_packs:
             assert not material["loaded"], name

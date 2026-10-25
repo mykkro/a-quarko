@@ -27,7 +27,8 @@ export function createPresentation({scene,mesh,mat,stonePack,fishMaterials,green
     const planted=getSettings().visualStyle==='planted';tank.visible=planted;base.visible=!planted;terrain.setPresentation(planted);
     green.forEach((m,i)=>m.color.set((planted?naturalColors:toyColors)[i]));
     fishMaterials.forEach(([body,fin],i)=>{if(i!==3)body.color.set((planted?naturalFish:toyFish)[i]);fin.transparent=planted;fin.opacity=planted?.78:1;fin.needsUpdate=true;});
-    gravelRoots.forEach(({x,z,s},i)=>{dummy.position.set(x,terrain.heightAt(x,z)+s*.25,z);dummy.rotation.set(i*.7,i*1.3,0);dummy.scale.set(s,s*.5,s*.8);dummy.updateMatrix();gravel.setMatrixAt(i,dummy.matrix);});gravel.instanceMatrix.needsUpdate=true;
+    const palettes={darksoil:['#514438','#655746','#766451','#37332d','#8b7862'],quartzsand:['#e8e1cd','#c6c6b9','#f0ebda','#d9d8ca','#b7b9b4']},gravelColors=palettes[getSettings().groundMaterial]||['#677063','#c5bc98','#807762','#d7cfae','#4c594d'];
+    gravelRoots.forEach(({x,z,s},i)=>{gravel.setColorAt(i,new THREE.Color(gravelColors[i%5]));dummy.position.set(x,terrain.heightAt(x,z)+s*.25,z);dummy.rotation.set(i*.7,i*1.3,0);dummy.scale.set(s,s*.5,s*.8);dummy.updateMatrix();gravel.setMatrixAt(i,dummy.matrix);});gravel.instanceMatrix.needsUpdate=true;gravel.instanceColor.needsUpdate=true;
     document.documentElement.dataset.style=planted?'planted':'miniature';
     lamp.material.emissiveIntensity=getSettings().timeOfDay==='night'?.025:.35;
   }

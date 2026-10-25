@@ -6,6 +6,36 @@ The app loads the JPEG variants selected by `formats.json`. Original generated P
 
 Generated with the built-in `image_gen` tool. Original PNG outputs are preserved here as project assets. The runtime derives linear grayscale bump and roughness maps from the color images; these are visual approximations, not measured PBR scans. Color maps use sRGB. Sand uses planar world-scale UVs; all maps use repeating wrapping, mipmaps, and anisotropic filtering. Procedural materials remain as a fallback if image loading fails.
 
+## darksoil
+
+Assets: `darksoil-albedo-v1.png` (local original), `darksoil-albedo-v1.jpg` (app).
+
+Generated using the built-in image generation tool. Converted with `tools/convert_textures.py`; derived bump/roughness maps load only when selected.
+
+Final prompt:
+
+Use case: photorealistic-natural. Asset type: seamless tileable albedo texture for a freshwater planted aquarium ground in WebGL. Single square edge-to-edge orthographic top-down scan of dark aquarium aquasoil: many small rounded porous clay granules, irregular 2 to 4 millimeter particles, charcoal brown, dark umber and muted slate tones, occasional tiny lighter mineral flecks. Realistic restrained granular surface, moderately dark values with readable detail, not pure black. Even diffuse neutral illumination, no baked directional cast shadows, no perspective, no wet glossy highlights, no plants, roots, animals or objects. Consistent particle scale across the image, repeatable edges, no border, text or watermark. 1024 square.
+
+## rivergravel
+
+Assets: `rivergravel-albedo-v1.png` (local original), `rivergravel-albedo-v1.jpg` (app).
+
+Generated using the built-in image generation tool. Converted with `tools/convert_textures.py`; derived bump/roughness maps load only when selected.
+
+Final prompt:
+
+Use case: photorealistic-natural. Asset type: seamless albedo texture for a small aquarium substrate. Square edge-to-edge flat orthographic top-down scan of fine mixed river gravel: tightly packed naturally rounded small pebbles in muted warm gray, olive gray, cream, tan and occasional dusty reddish brown, mostly 3 to 7 millimeters across, subtle natural stone grain, worn edges and tiny sand between pebbles. Calm natural freshwater aquarium look, controlled contrast, physically plausible random packing. Uniform diffuse neutral lighting without directional shadows, no perspective, no wet specular highlights, no plants or debris or animals. Seamless repeating edges, no text, border or watermark. 1024 square.
+
+## quartzsand
+
+Assets: `quartzsand-albedo-v1.png` (local original), `quartzsand-albedo-v1.jpg` (app).
+
+Generated using the built-in image generation tool. Converted with `tools/convert_textures.py`; derived bump/roughness maps load only when selected.
+
+Final prompt:
+
+Use case: photorealistic-natural. Asset type: seamless repeating albedo texture for fine pale quartz sand in a 3D freshwater aquarium. Square edge-to-edge orthographic macro top-down scan, densely packed tiny rounded ivory and pale warm gray quartz grains, delicate translucent mineral speckling with occasional very small gray grains, faint soft irregular ripple traces. Pale neutral cream rather than clipped white, subtle low-contrast texture and believable grain scale. Perfectly uniform diffuse neutral lighting, no directional cast shadows, no shiny reflections, no perspective, no objects, plants or animals. Repeatable edges, no border, text or watermark. 1024 square.
+
 ## shell
 
 Assets: `shell-albedo-v1.png` (original) and `shell-albedo-v1.jpg` (app variant).

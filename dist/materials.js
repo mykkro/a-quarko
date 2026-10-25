@@ -1,9 +1,9 @@
 import * as THREE from './vendor/three.module.js';
 
-export const textureNames=['sand','stone','moss','leaf','fish','limestone','brick','slate','terracotta','shell','shrimp','plankton'];
+export const textureNames=['sand','stone','moss','leaf','fish','limestone','brick','slate','terracotta','shell','shrimp','plankton','darksoil','rivergravel','quartzsand'];
 // Mean albedo of each scan (see tools/convert_textures.py inputs), shown until
 // the image arrives.
-const meanColors={sand:'#d4b590',stone:'#8a8875',moss:'#3d5712',leaf:'#7eb225',fish:'#918f8c',limestone:'#b8aa93',brick:'#91664e',slate:'#5e6260',terracotta:'#985d3e',shell:'#e0c1a6',shrimp:'#a9a198',plankton:'#c3b486'};
+const meanColors={sand:'#d4b590',stone:'#8a8875',moss:'#3d5712',leaf:'#7eb225',fish:'#918f8c',limestone:'#b8aa93',brick:'#91664e',slate:'#5e6260',terracotta:'#985d3e',shell:'#e0c1a6',shrimp:'#a9a198',plankton:'#c3b486',darksoil:'#51463b',rivergravel:'#aca28b',quartzsand:'#dbd3bd'};
 
 // Every pack exists immediately with 1x1 placeholder images, so the scene can
 // render before any download. A pack downloads only when ensure() asks for it
